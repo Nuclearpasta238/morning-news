@@ -1,0 +1,53 @@
+name: Daily News Dashboard
+
+on:
+  schedule:
+    # 6:00 AM UTC every day
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual run (optional)'
+        required: false
+        default: 'Manual trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  generate-dashboard:
+    name: Generate Morning Briefing
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate news dashboard
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/fetch_news.py
+
+      - name: Commit and push dashboard
+        run: |
+          git config user.name  "Morning News Bot"
+          git config user.email "morning-news-bot@users.noreply.github.com"
+          git add output/dashboard.html
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "📰 Daily briefing: $(date -u +'%A, %B %d, %Y')"
+            git push origin HEAD
+          fi
