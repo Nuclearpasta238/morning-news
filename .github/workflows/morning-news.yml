@@ -1,0 +1,42 @@
+name: Morning News Dashboard
+
+on:
+  schedule:
+    # Runs every day at 6:00 AM UTC (adjust to your timezone)
+    - cron: "0 6 * * *"
+  workflow_dispatch: # allows manual trigger from GitHub Actions tab
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # needed to commit dashboard.html back to the repo
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install feedparser requests
+
+      - name: Generate dashboard and publish to tiiny.host via Zapier
+        env:
+          # Add this secret in: GitHub repo → Settings → Secrets → Actions
+          # Value: your Zapier "Catch Hook" webhook URL
+          ZAPIER_WEBHOOK_URL: ${{ secrets.ZAPIER_WEBHOOK_URL }}
+        run: python scripts/generate_news.py
+
+      - name: Commit updated dashboard to repo
+        run: |
+          git config user.name  "Morning News Bot"
+          git config user.email "actions@github.com"
+          git add output/dashboard.html
+          git diff --staged --quiet && echo "No changes" || \
+            git commit -m "chore: update news dashboard $(date -u +%Y-%m-%d)" && \
+            git push
