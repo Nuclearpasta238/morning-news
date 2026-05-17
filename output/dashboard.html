@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morning News Dashboard — May 17, 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0d0f14;
+      --surface:     #161b25;
+      --surface2:    #1e2536;
+      --border:      #2a3145;
+      --accent-tech:    #3b82f6;
+      --accent-ai:      #a855f7;
+      --accent-space:   #06b6d4;
+      --accent-gpu:     #22c55e;
+      --accent-pricing: #f59e0b;
+      --accent-bigtech: #f43f5e;
+      --text:        #e2e8f0;
+      --text-muted:  #64748b;
+      --text-dim:    #94a3b8;
+      --tag-bg:      #1e2536;
+      --radius:      12px;
+      --radius-sm:   8px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #0d0f14 0%, #161b25 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-eyebrow {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    header h1 {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #e2e8f0 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-meta {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .header-meta span { display: flex; align-items: center; gap: 0.3rem; }
+
+    .live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(1.3); }
+    }
+
+    /* ── Category nav pills ── */
+    .cat-nav {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 1rem 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cat-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-dim);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .cat-pill:hover { border-color: currentColor; color: var(--text); }
+
+    .cat-pill[data-cat="tech"]    { --c: var(--accent-tech); }
+    .cat-pill[data-cat="ai"]      { --c: var(--accent-ai); }
+    .cat-pill[data-cat="space"]   { --c: var(--accent-space); }
+    .cat-pill[data-cat="gpu"]     { --c: var(--accent-gpu); }
+    .cat-pill[data-cat="pricing"] { --c: var(--accent-pricing); }
+    .cat-pill[data-cat="bigtech"] { --c: var(--accent-bigtech); }
+
+    .cat-pill:hover { color: var(--c); border-color: var(--c); }
+
+    /* ── Main grid ── */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* ── Category section ── */
+    .category {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.25s;
+    }
+
+    .category:hover { border-color: var(--accent-color, var(--border)); }
+
+    .category[data-cat="tech"]    { --accent-color: var(--accent-tech); }
+    .category[data-cat="ai"]      { --accent-color: var(--accent-ai); }
+    .category[data-cat="space"]   { --accent-color: var(--accent-space); }
+    .category[data-cat="gpu"]     { --accent-color: var(--accent-gpu); }
+    .category[data-cat="pricing"] { --accent-color: var(--accent-pricing); }
+    .category[data-cat="bigtech"] { --accent-color: var(--accent-bigtech); }
+
+    .category-header {
+      padding: 1.1rem 1.25rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--accent-color) 8%, transparent), transparent);
+    }
+
+    .category-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .category-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-color);
+    }
+
+    .story-count {
+      margin-left: auto;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--surface2);
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── Story cards ── */
+    .stories { display: flex; flex-direction: column; }
+
+    .story {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.75rem;
+      align-items: start;
+      transition: background 0.15s;
+    }
+
+    .story:last-child { border-bottom: none; }
+    .story:hover { background: var(--surface2); }
+
+    .story-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .story-body {}
+
+    .story-headline {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+      margin-bottom: 0.35rem;
+    }
+
+    .story-summary {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.55;
+    }
+
+    .story-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.5rem;
+    }
+
+    .tag {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+      color: var(--accent-color);
+      border: 1px solid color-mix(in srgb, var(--accent-color) 25%, transparent);
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">Daily Intelligence Brief</div>
+  <h1>Morning News Dashboard</h1>
+  <div class="header-meta">
+    <span><span class="live-dot"></span> Live</span>
+    <span>📅 Sunday, May 17, 2026</span>
+    <span>🗂 6 categories &nbsp;·&nbsp; 28 stories</span>
+  </div>
+</header>
+
+<nav class="cat-nav">
+  <a class="cat-pill" data-cat="tech"    href="#tech">⚡ Tech</a>
+  <a class="cat-pill" data-cat="ai"      href="#ai">🤖 AI</a>
+  <a class="cat-pill" data-cat="space"   href="#space">🚀 Space</a>
+  <a class="cat-pill" data-cat="gpu"     href="#gpu">🎮 GPUs</a>
+  <a class="cat-pill" data-cat="pricing" href="#pricing">💰 Pricing</a>
+  <a class="cat-pill" data-cat="bigtech" href="#bigtech">🏢 Big Tech</a>
+</nav>
+
+<main>
+
+  <!-- ── TECH ── -->
+  <section class="category" data-cat="tech" id="tech">
+    <div class="category-header">
+      <span class="category-icon">⚡</span>
+      <span class="category-title">Tech News</span>
+      <span class="story-count">5 stories</span>
+    </div>
+    <div class="stories">
+
+      <div class="story">
+        <div class="story-num">1</div>
+        <div class="story-body">
+          <div class="story-headline">Google in Talks with SpaceX to Launch Orbital Data Centers</div>
+          <div class="story-summary">Google is in advanced discussions with SpaceX to place data centers in orbit — a major infrastructure shift aimed at solving AI compute bottlenecks. SpaceX claims orbital sites will be the lowest-cost AI compute option within years.</div>
+          <div class="story-tags"><span class="tag">AI Infra</span><span class="tag">SpaceX</span><span class="tag">Google</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">2</div>
+        <div class="story-body">
+          <div class="story-headline">AI Used to Weaponize Zero-Day Vulnerability for the First Time</div>
+          <div class="story-summary">Google confirmed the first known criminal use of AI to discover and exploit a zero-day vulnerability. The attack was blocked, but the milestone signals a new era for AI-powered cyberthreats.</div>
+          <div class="story-tags"><span class="tag">Cybersecurity</span><span class="tag">Zero-Day</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">3</div>
+        <div class="story-body">
+          <div class="story-headline">Cerebras Surges 68% on Nasdaq Debut, Hits $95B Valuation</div>
+          <div class="story-summary">Wafer-scale chipmaker Cerebras had a spectacular IPO, closing its first trading day at a $95 billion market cap — one of the biggest tech debuts of the decade and a signal of frothy AI chip appetite.</div>
+          <div class="story-tags"><span class="tag">IPO</span><span class="tag">Chips</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">4</div>
+        <div class="story-body">
+          <div class="story-headline">Samsung Union Plans 18-Day Strike Over AI Bonus Disparity</div>
+          <div class="story-summary">More than 45,000 Samsung workers are preparing an 18-day strike starting May 21. The dispute centers on unequal bonuses tied to AI-driven profits in Samsung's memory chip division.</div>
+          <div class="story-tags"><span class="tag">Samsung</span><span class="tag">Labor</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">5</div>
+        <div class="story-body">
+          <div class="story-headline">71% of Americans Oppose AI Data Centers in Their Communities</div>
+          <div class="story-summary">A new Gallup survey finds strong local resistance to AI infrastructure: 71% of U.S. adults oppose nearby data centers, with nearly half strongly opposed — posing a growing siting challenge for the industry.</div>
+          <div class="story-tags"><span class="tag">Public Opinion</span><span class="tag">Data Centers</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── AI ── -->
+  <section class="category" data-cat="ai" id="ai">
+    <div class="category-header">
+      <span class="category-icon">🤖</span>
+      <span class="category-title">Artificial Intelligence</span>
+      <span class="story-count">5 stories</span>
+    </div>
+    <div class="stories">
+
+      <div class="story">
+        <div class="story-num">1</div>
+        <div class="story-body">
+          <div class="story-headline">Chief AI Officer Role Explodes — 76% of Major Firms Now Have a CAIO</div>
+          <div class="story-summary">The CAIO title has gone mainstream: 76% of surveyed organizations now have a Chief AI Officer, up from just 26% in 2025. The role oversees AI infrastructure, governance, workflow modernization, and integration across the enterprise.</div>
+          <div class="story-tags"><span class="tag">Enterprise AI</span><span class="tag">Leadership</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">2</div>
+        <div class="story-body">
+          <div class="story-headline">Apple to Let Users Choose Their AI: Google, Anthropic, and More</div>
+          <div class="story-summary">Apple is reportedly preparing a platform shift in iOS 27, iPadOS 27, and macOS 27 that will allow users to select third-party AI providers — including Google and Anthropic — to power Apple Intelligence features.</div>
+          <div class="story-tags"><span class="tag">Apple</span><span class="tag">iOS 27</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">3</div>
+        <div class="story-body">
+          <div class="story-headline">Anthropic Commits $200B+ to Cloud & Launches Claude for Small Business</div>
+          <div class="story-summary">Anthropic has committed over $200 billion toward cloud infrastructure (largely with Google Cloud) and launched a small-business product bundling Claude with QuickBooks, HubSpot, DocuSign, PayPal, and Google Workspace.</div>
+          <div class="story-tags"><span class="tag">Anthropic</span><span class="tag">Claude</span><span class="tag">SMB</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">4</div>
+        <div class="story-body">
+          <div class="story-headline">Global AI Adoption Reaches 17.8% of Working-Age Population</div>
+          <div class="story-summary">AI usage climbed 1.5 percentage points in Q1 2026 to 17.8% of the global working-age population, continuing a sharp upward trend as AI tools become embedded in daily professional workflows worldwide.</div>
+          <div class="story-tags"><span class="tag">Adoption</span><span class="tag">Global</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">5</div>
+        <div class="story-body">
+          <div class="story-headline">Snap-Perplexity $400M AI Partnership Collapses Before Launch</div>
+          <div class="story-summary">Snap confirmed the end of its previously announced $400 million partnership with Perplexity AI before it ever reached a broad rollout — a high-profile casualty of the increasingly competitive AI platform wars.</div>
+          <div class="story-tags"><span class="tag">Snap</span><span class="tag">Perplexity</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── SPACE ── -->
+  <section class="category" data-cat="space" id="space">
+    <div class="category-header">
+      <span class="category-icon">🚀</span>
+      <span class="category-title">Space</span>
+      <span class="story-count">5 stories</span>
+    </div>
+    <div class="stories">
+
+      <div class="story">
+        <div class="story-num">1</div>
+        <div class="story-body">
+          <div class="story-headline">Artemis II Sends Humans Around the Far Side of the Moon</div>
+          <div class="story-summary">Four astronauts aboard NASA's Orion spacecraft on the most powerful human-rated rocket ever built swung around the lunar far side in the Artemis II mission — humanity's first crewed deep-space flight in over 50 years. Coverage continues into May.</div>
+          <div class="story-tags"><span class="tag">NASA</span><span class="tag">Artemis</span><span class="tag">Moon</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">2</div>
+        <div class="story-body">
+          <div class="story-headline">SpaceX CRS-34 Launches with 6,500 lbs of Science to the ISS</div>
+          <div class="story-summary">SpaceX's 34th Commercial Resupply Services mission launched May 15 aboard a Falcon 9, delivering 6,500 pounds of science payloads and crew supplies to the International Space Station.</div>
+          <div class="story-tags"><span class="tag">SpaceX</span><span class="tag">ISS</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">3</div>
+        <div class="story-body">
+          <div class="story-headline">NASA Tests Electromagnetic Thruster and Autonomous Deep-Space Chip</div>
+          <div class="story-summary">A next-generation electromagnetic thruster cleared a high-energy test at JPL, while NASA also validated a new space computer chip designed to let spacecraft operate autonomously far from Earth — critical tech for future deep-space missions.</div>
+          <div class="story-tags"><span class="tag">Propulsion</span><span class="tag">Deep Space</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">4</div>
+        <div class="story-body">
+          <div class="story-headline">Psyche Spacecraft Makes Close Flyby of Mars for Gravity Boost</div>
+          <div class="story-summary">NASA's Psyche mission skimmed just 2,800 miles above Mars in a dramatic gravity-assist maneuver, gaining velocity on its journey to the metal-rich asteroid Psyche — a remnant planetary core unlike anything yet visited.</div>
+          <div class="story-tags"><span class="tag">NASA</span><span class="tag">Asteroid</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">5</div>
+        <div class="story-body">
+          <div class="story-headline">Ireland Signs Artemis Accords, Joining International Lunar Alliance</div>
+          <div class="story-summary">Ireland became the latest nation to sign the Artemis Accords at a ceremony at NASA Headquarters on May 4, joining a growing coalition of countries committed to peaceful and transparent lunar exploration.</div>
+          <div class="story-tags"><span class="tag">Artemis Accords</span><span class="tag">Ireland</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── GPU ── -->
+  <section class="category" data-cat="gpu" id="gpu">
+    <div class="category-header">
+      <span class="category-icon">🎮</span>
+      <span class="category-title">Graphics Cards &amp; GPUs</span>
+      <span class="story-count">4 stories</span>
+    </div>
+    <div class="stories">
+
+      <div class="story">
+        <div class="story-num">1</div>
+        <div class="story-body">
+          <div class="story-headline">RTX 5090 Settles Near $3,700 After Earlier $5,000+ Panic</div>
+          <div class="story-summary">NVIDIA's flagship RTX 5090 has pulled back from its peak hysteria, now hovering around $3,700 — still well above MSRP, but down from earlier forecasts of $5,000+. High-end cards broadly remain 30%+ above list price.</div>
+          <div class="story-tags"><span class="tag">NVIDIA</span><span class="tag">RTX 50</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">2</div>
+        <div class="story-body">
+          <div class="story-headline">GDDR7 Memory Now Over 80% of GPU Bill-of-Materials</div>
+          <div class="story-summary">AI data center demand has pushed GDDR7 and GDDR6 prices up several hundred percent, with memory now accounting for more than 80% of a GPU's total BOM cost — the core reason consumer card prices remain historically elevated.</div>
+          <div class="story-tags"><span class="tag">VRAM</span><span class="tag">Memory</span><span class="tag">Pricing</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">3</div>
+        <div class="story-body">
+          <div class="story-headline">AMD RX 9700 XT Leads as the Best-Value Mid-Range Card at $699</div>
+          <div class="story-summary">AMD's Radeon RX 9700 XT has emerged as the standout value proposition in the May 2026 GPU market, offering strong rasterization and competitive ray-tracing at its $699 price point in a market full of inflated NVIDIA options.</div>
+          <div class="story-tags"><span class="tag">AMD</span><span class="tag">RDNA 4</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">4</div>
+        <div class="story-body">
+          <div class="story-headline">NVIDIA Super Refresh Uncertain; RDNA 5 Pushed to 2027</div>
+          <div class="story-summary">Buyers hoping for near-term price relief may be waiting: NVIDIA's rumored Super refresh timeline remains murky, and AMD has confirmed its next-gen RDNA 5 architecture won't arrive until 2027 — leaving the current lineup entrenched.</div>
+          <div class="story-tags"><span class="tag">Roadmap</span><span class="tag">RDNA 5</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── PRICING ── -->
+  <section class="category" data-cat="pricing" id="pricing">
+    <div class="category-header">
+      <span class="category-icon">💰</span>
+      <span class="category-title">Pricing &amp; Economics</span>
+      <span class="story-count">5 stories</span>
+    </div>
+    <div class="stories">
+
+      <div class="story">
+        <div class="story-num">1</div>
+        <div class="story-body">
+          <div class="story-headline">PC Prices Could Rise 20%+ in 2026 Driven by Memory Shortage</div>
+          <div class="story-summary">IDC projects retail PC prices could climb 20% or more in 2026. AI data centers are consuming enormous quantities of memory, throttling supply to consumer markets and forcing laptop and desktop makers to reprice products.</div>
+          <div class="story-tags"><span class="tag">PC</span><span class="tag">Memory</span><span class="tag">Inflation</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">2</div>
+        <div class="story-body">
+          <div class="story-headline">Smartphone ASPs Projected to Rise 8% as Supply Tightens</div>
+          <div class="story-summary">IDC forecasts average smartphone selling prices will increase ~8% in 2026. Constrained memory supply and ongoing tariff pressures are squeezing manufacturers, with costs passed along to consumers at checkout.</div>
+          <div class="story-tags"><span class="tag">Smartphones</span><span class="tag">Tariffs</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">3</div>
+        <div class="story-body">
+          <div class="story-headline">Durable Goods Prices to Jump 4.5% — Electronics, Toys, Appliances</div>
+          <div class="story-summary">Morningstar expects durable goods prices to rise 4.5% across the board in 2026, driven by a combination of tariffs, memory cost pressure, and labor inflation — hitting consumer electronics, toys, tools, and small appliances hardest.</div>
+          <div class="story-tags"><span class="tag">Tariffs</span><span class="tag">CPI</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">4</div>
+        <div class="story-body">
+          <div class="story-headline">"Shrinkflation" Hits Tech: Less RAM, Smaller Screens, Same Price</div>
+          <div class="story-summary">Unable to absorb rising costs, some manufacturers are quietly downgrading device specs — reducing RAM, screen quality, or battery capacity — while holding sticker prices steady. A stealth price increase disguised as a product refresh.</div>
+          <div class="story-tags"><span class="tag">Shrinkflation</span><span class="tag">Consumer</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">5</div>
+        <div class="story-body">
+          <div class="story-headline">U.S. Consumer Tech Revenue Still Hits $565B Despite Headwinds</div>
+          <div class="story-summary">The CTA forecasts U.S. consumer tech revenue reaching $565 billion in 2026 — a new high — even amid tariff pressures and economic headwinds, buoyed by strong AI-device adoption and premium product cycles.</div>
+          <div class="story-tags"><span class="tag">CTA</span><span class="tag">Market</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── BIG TECH ── -->
+  <section class="category" data-cat="bigtech" id="bigtech">
+    <div class="category-header">
+      <span class="category-icon">🏢</span>
+      <span class="category-title">Big Tech</span>
+      <span class="story-count">5 stories</span>
+    </div>
+    <div class="stories">
+
+      <div class="story">
+        <div class="story-num">1</div>
+        <div class="story-body">
+          <div class="story-headline">Big Tech to Spend $725B on Capex in 2026 — Up 77% Year-Over-Year</div>
+          <div class="story-summary">Google, Amazon, Microsoft, and Meta collectively plan $725 billion in capital expenditure this year — a 77% jump from 2025's record $410 billion — as AI infrastructure investment accelerates into historic territory.</div>
+          <div class="story-tags"><span class="tag">CapEx</span><span class="tag">AI Infra</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">2</div>
+        <div class="story-body">
+          <div class="story-headline">Google Cloud Grows 63% YoY to $20B; Alphabet Guides $185B+ Capex</div>
+          <div class="story-summary">Alphabet raised its 2026 capex guidance to $180–190 billion, backed by Google Cloud's explosive 63% year-over-year revenue growth to $20 billion. Investors rewarded the report as Google demonstrated AI spending is translating to real revenue.</div>
+          <div class="story-tags"><span class="tag">Alphabet</span><span class="tag">Cloud</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">3</div>
+        <div class="story-body">
+          <div class="story-headline">Meta Cuts 8,000 Jobs, Creates Superintelligence Lab</div>
+          <div class="story-summary">Meta is laying off approximately 8,000 employees and cutting 6,000 open roles (effective May 20) while simultaneously launching Meta Superintelligence Labs — a new division dedicated to AGI research. Capex guidance raised to $145 billion+.</div>
+          <div class="story-tags"><span class="tag">Meta</span><span class="tag">Layoffs</span><span class="tag">AGI</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">4</div>
+        <div class="story-body">
+          <div class="story-headline">Microsoft Blames $25B of Its Record Capex on Rising Memory Prices</div>
+          <div class="story-summary">Microsoft's CFO attributed $25 billion of the company's record capital expenditure budget directly to elevated memory chip costs — laying bare how the AI memory shortage is cascading through even the largest balance sheets in tech.</div>
+          <div class="story-tags"><span class="tag">Microsoft</span><span class="tag">Memory</span></div>
+        </div>
+      </div>
+
+      <div class="story">
+        <div class="story-num">5</div>
+        <div class="story-body">
+          <div class="story-headline">Google I/O 2026 Set for May 19–20 — AI Features Expected to Dominate</div>
+          <div class="story-summary">Google has published the session schedule for I/O 2026, running May 19–20 at Shoreline Amphitheatre in Mountain View. AI product announcements are expected to dominate, with updates to Gemini, Android, and Google Cloud AI services.</div>
+          <div class="story-tags"><span class="tag">Google I/O</span><span class="tag">Gemini</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Morning News Dashboard &nbsp;·&nbsp; May 17, 2026 &nbsp;·&nbsp; Sources:
+    <a href="https://techstartups.com" target="_blank" rel="noopener">Tech Startups</a> &nbsp;·&nbsp;
+    <a href="https://www.tomshardware.com" target="_blank" rel="noopener">Tom's Hardware</a> &nbsp;·&nbsp;
+    <a href="https://spacenews.com" target="_blank" rel="noopener">SpaceNews</a> &nbsp;·&nbsp;
+    <a href="https://www.nasa.gov" target="_blank" rel="noopener">NASA</a> &nbsp;·&nbsp;
+    <a href="https://www.cnbc.com" target="_blank" rel="noopener">CNBC</a> &nbsp;·&nbsp;
+    <a href="https://fortune.com" target="_blank" rel="noopener">Fortune</a>
+  </p>
+</footer>
+
+</body>
+</html>
