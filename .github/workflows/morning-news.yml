@@ -25,11 +25,11 @@ jobs:
       - name: Install dependencies
         run: pip install feedparser requests
 
-      - name: Generate dashboard and publish to tiiny.host via Zapier
+      - name: Generate dashboard and publish to Notion
         env:
-          # Add this secret in: GitHub repo → Settings → Secrets → Actions
-          # Value: your Zapier "Catch Hook" webhook URL
-          ZAPIER_WEBHOOK_URL: ${{ secrets.ZAPIER_WEBHOOK_URL }}
+          # Add these in: GitHub repo → Settings → Secrets → Actions
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID }}
         run: python scripts/generate_news.py
 
       - name: Commit updated dashboard to repo
